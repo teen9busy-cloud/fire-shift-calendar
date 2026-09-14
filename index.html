@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>2026 경남소방 3교대 근무표 달력</title>
+  <meta name="description" content="2026년 경남소방 대원 3교대(3팀-1팀-2팀 순환) 스마트 근무표 달력 - 모바일 및 PC 지원">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="경남소방 근무표">
+
+  <!-- Pretendard Web Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            team1: {
+              DEFAULT: '#2563EB',
+              bg: '#EFF6FF',
+              border: '#BFDBFE',
+              text: '#1D4ED8',
+              badge: '#1D4ED8',
+            },
+            team2: {
+              DEFAULT: '#059669',
+              bg: '#ECFDF5',
+              border: '#A7F3D0',
+              text: '#047857',
+              badge: '#047857',
+            },
+            team3: {
+              DEFAULT: '#EA580C',
+              bg: '#FFF7ED',
+              border: '#FDBA74',
+              text: '#C2410C',
+              badge: '#EA580C',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Custom Scrollbar for Month Nav */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .calendar-container {
+        box-shadow: none !important;
+        border: 1px solid #999 !important;
+      }
+      .calendar-cell {
+        min-height: 85px !important;
+        page-break-inside: avoid;
+      }
+    }
+
+    .active-pill {
+      box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen antialiased flex flex-col selection:bg-blue-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 via-red-500 to-blue-600 flex items-center justify-center shadow-md shadow-red-900/30 text-xl">
+          🚒
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg sm:text-xl font-black tracking-tight text-white">경남소방 3교대 근무표</h1>
+            <span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold px-2 py-0.5 rounded-full">2026년</span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">3팀 ➔ 1팀 ➔ 2팀 순환 주기 (9/1: 3팀 기준)</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center space-x-2 no-print">
+        <button id="btn-today" onclick="goToToday()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <span>🎯</span> 오늘로 이동
+        </button>
+        <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="인쇄 및 PDF 저장">
+          <span>🖨️</span> <span class="hidden sm:inline">인쇄/PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 w-full flex-grow space-y-4 sm:space-y-6">
+
+    <!-- HERO: TODAY STATUS & SEARCH BAR -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 no-print">
+      <!-- Today's Shift Card -->
+      <div id="today-card" class="lg:col-span-2 bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>실시간 오늘 당번
+            </span>
+            <span id="today-date-str" class="text-xs sm:text-sm text-slate-500 font-medium">로딩 중...</span>
+          </div>
+          <div class="flex items-baseline gap-2 pt-1">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">오늘 당번:</span>
+            <span id="today-team-badge" class="text-2xl sm:text-3xl font-black px-3.5 py-0.5 rounded-xl shadow-sm tracking-tight text-white bg-slate-800">
+              -
+            </span>
+          </div>
+          <p id="today-next-preview" class="text-xs sm:text-sm text-slate-500 pt-0.5">내일 당번: -</p>
+        </div>
+
+        <!-- Shift Rule Badges -->
+        <div class="flex sm:flex-col gap-1.5 w-full sm:w-auto text-xs font-semibold bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+          <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 hidden sm:block">순환 규칙 안내</div>
+          <div class="flex items-center justify-between gap-3 text-slate-600">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>3팀</span>
+            <span class="text-slate-300">➔</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>1팀</span>
+            <span class="text-slate-300">➔</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span>2팀</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Date Lookup Card -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+        <div class="space-y-1">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+            <span>🔍</span> 특정 날짜 당번 바로 조회
+          </div>
+          <p class="text-xs text-slate-400">상담 또는 일정 잡을 날짜를 선택하세요</p>
+        </div>
+        <div class="mt-3 flex gap-2">
+          <input type="date" id="quick-date-picker" value="2026-09-01" min="2026-01-01" max="2026-12-31" 
+                 class="flex-1 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
+          <button onclick="handleQuickLookup()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl transition shadow-sm flex items-center justify-center">
+            조회
+          </button>
+        </div>
+        <div id="quick-result" class="mt-2 text-xs font-medium text-slate-600 h-5 flex items-center">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROL PANEL: VIEWS & FILTERS -->
+    <section class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200/80 space-y-3 no-print">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <!-- View Toggle (Monthly vs Yearly) -->
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+          <button id="view-tab-month" onclick="switchView('month')" class="flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-900 shadow-sm">
+            📅 월간 달력
+          </button>
+          <button id="view-tab-year" onclick="switchView('year')" class="flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-500 hover:text-slate-900">
+            🗓️ 2026 전체 1년 보기
+          </button>
+        </div>
+
+        <!-- Team Filter Buttons -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <span class="text-xs font-bold text-slate-400 mr-1 whitespace-nowrap">팀 필터:</span>
+          <button onclick="setTeamFilter('all')" id="filter-all" class="filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition">
+            전체 보기
+          </button>
+          <button onclick="setTeamFilter('1')" id="filter-1" class="filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition border border-blue-200">
+            1팀만
+          </button>
+          <button onclick="setTeamFilter('2')" id="filter-2" class="filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition border border-emerald-200">
+            2팀만
+          </button>
+          <button onclick="setTeamFilter('3')" id="filter-3" class="filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-orange-50 text-orange-800 hover:bg-orange-100 transition border border-orange-200">
+            3팀만
+          </button>
+        </div>
+      </div>
+
+      <!-- Month Quick Navigation Pills (Visible in Monthly View) -->
+      <div id="month-pills-container" class="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <button onclick="prevMonth()" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex-shrink-0" title="이전 달">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        
+        <div class="flex items-center gap-1.5 flex-grow justify-between sm:justify-start overflow-x-auto no-scrollbar">
+          <!-- 1월 ~ 12월 Buttons generated by JS -->
+          <div id="month-buttons" class="flex gap-1.5"></div>
+        </div>
+
+        <button onclick="nextMonth()" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex-shrink-0" title="다음 달">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- MONTHLY CALENDAR VIEW -->
+    <section id="monthly-view" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden calendar-container">
+      <!-- Month Header -->
+      <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <button onclick="prevMonth()" class="no-print p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="flex items-baseline space-x-2">
+            <h2 id="calendar-title" class="text-2xl sm:text-3xl font-black tracking-tight text-white">2026년 9월</h2>
+            <span id="calendar-month-duty-count" class="text-xs sm:text-sm text-slate-400 font-semibold"></span>
+          </div>
+          <button onclick="nextMonth()" class="no-print p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- Legend -->
+        <div class="hidden md:flex items-center gap-2 text-xs font-bold">
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-600 text-white shadow-xs">1팀</span>
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-600 text-white shadow-xs">2팀</span>
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-orange-600 text-white shadow-xs">3팀</span>
+        </div>
+      </div>
+
+      <!-- Day of Week Header -->
+      <div class="grid grid-cols-7 text-center font-bold text-xs sm:text-sm border-b border-slate-200 bg-slate-50/80">
+        <div class="py-2.5 text-red-600">일</div>
+        <div class="py-2.5 text-slate-700">월</div>
+        <div class="py-2.5 text-slate-700">화</div>
+        <div class="py-2.5 text-slate-700">수</div>
+        <div class="py-2.5 text-slate-700">목</div>
+        <div class="py-2.5 text-slate-700">금</div>
+        <div class="py-2.5 text-blue-600">토</div>
+      </div>
+
+      <!-- Calendar Grid Cells -->
+      <div id="calendar-grid" class="grid grid-cols-7 divide-x divide-y divide-slate-200 border-b border-slate-200">
+        <!-- Cells generated by JavaScript -->
+      </div>
+
+      <!-- Month Footer Stats -->
+      <div class="p-3 sm:p-4 bg-slate-50 text-xs sm:text-sm text-slate-600 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200">
+        <div class="flex items-center gap-4 flex-wrap" id="month-stat-badges">
+          <!-- Dynamic stats -->
+        </div>
+        <div class="text-slate-400 text-xs font-medium">
+          💡 날짜를 누르면 전후 당번 및 상세 정보를 확인할 수 있습니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- YEARLY 12-MONTH VIEW (Hidden by default) -->
+    <section id="yearly-view" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900">2026년 3교대 전체 근무 연간표</h2>
+          <p class="text-xs sm:text-sm text-slate-500 font-medium">각 월을 클릭하면 해당 월의 큰 달력으로 바로 이동합니다.</p>
+        </div>
+        <button onclick="switchView('month')" class="px-3.5 py-1.5 bg-slate-900 text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-slate-800 transition">
+          월간 달력으로 돌아가기
+        </button>
+      </div>
+
+      <!-- 12 Months Grid -->
+      <div id="year-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Generated by JS -->
+      </div>
+    </section>
+
+    <!-- ABOUT / GUIDELINES ACCORDION -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 no-print text-sm text-slate-600 space-y-3">
+      <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+        <span>📋</span> 경남소방 3교대 근무표 이용 안내 및 규칙
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+          <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span> 교대 순환 규칙
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            <strong>3팀 ➔ 1팀 ➔ 2팀</strong> 3일 주기로 순환합니다. 9월 1일이 3팀이므로 9월 2일은 1팀, 3일은 2팀 순으로 반복됩니다.
+          </p>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+          <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> 모바일 홈 화면 바로가기
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            스마트폰 브라우저 메뉴에서 <strong>'홈 화면에 추가'</strong>를 누르시면 앱처럼 아이콘으로 바탕화면에서 바로 켤 수 있습니다.
+          </p>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+          <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 실무자 & 상담사 팁
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            우측 상단 <strong>팀 필터</strong>를 누르면 원하는 팀의 근무일만 선명하게 강조되어 당번 매칭과 상담 일정 조율이 편합니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-xs text-center no-print">
+    <div class="max-w-6xl mx-auto px-4 space-y-1">
+      <p class="font-semibold text-slate-300">2026 경남소방 대원 3교대 근무표 달력 시스템</p>
+      <p class="text-slate-500">GitHub Pages 호환 정적 웹 애플리케이션 • PC/모바일 전 기기 반응형 최적화</p>
+    </div>
+  </footer>
+
+  <!-- DETAIL MODAL -->
+  <div id="date-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 transition-all duration-200" onclick="closeModalOnBackdrop(event)">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200" id="date-modal-content">
+      <div class="flex items-start justify-between">
+        <div>
+          <span id="modal-holiday-badge" class="hidden mb-1.5 inline-block text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">공휴일</span>
+          <h3 id="modal-date-title" class="text-xl sm:text-2xl font-black text-slate-900">2026년 9월 1일 (화)</h3>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg">
+          ✕
+        </button>
+      </div>
+
+      <!-- Main Duty Info -->
+      <div class="mt-5 p-4 rounded-2xl text-center" id="modal-team-box">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">당일 근무 당번</span>
+        <div id="modal-team-name" class="text-4xl font-black my-1">3팀</div>
+        <p id="modal-team-desc" class="text-xs text-slate-500 font-medium">경남소방 대원 24시간 교대 근무</p>
+      </div>
+
+      <!-- Surrounding Shifts -->
+      <div class="mt-4 grid grid-cols-2 gap-2 text-xs font-semibold">
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="text-[11px] text-slate-400">전날 당번</div>
+          <div id="modal-prev-shift" class="text-sm font-bold text-slate-800 mt-0.5">-</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="text-[11px] text-slate-400">다음날 당번</div>
+          <div id="modal-next-shift" class="text-sm font-bold text-slate-800 mt-0.5">-</div>
+        </div>
+      </div>
+
+      <!-- Memo Field -->
+      <div class="mt-4">
+        <label for="modal-memo-input" class="block text-xs font-bold text-slate-700 mb-1">📝 상담/업무 메모</label>
+        <textarea id="modal-memo-input" rows="2" placeholder="이 날짜에 메모할 내용이 있다면 입력하세요 (기기에 자동 저장)" 
+                  class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"></textarea>
+      </div>
+
+      <div class="mt-5 flex gap-2">
+        <button onclick="saveMemo()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-xl transition shadow-sm">
+          메모 저장
+        </button>
+        <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       1. CONSTANTS & ROTATION LOGIC
+       - Reference date: 2026-09-01 is Team 3
+       - Pattern sequence: 3 -> 1 -> 2
+       ========================================================================== */
+    const REFERENCE_DATE = new Date(2026, 8, 1); // 2026-09-01 (month is 0-indexed)
+    const SHIFT_PATTERN = [3, 1, 2]; // 0: 3팀, 1: 1팀, 2: 2팀
+    const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+    // 2026 Korean Public Holidays & Substitute Holidays
+    const HOLIDAYS_2026 = {
+      '2026-01-01': '신정',
+      '2026-02-16': '설날 연휴',
+      '2026-02-17': '설날',
+      '2026-02-18': '설날 연휴',
+      '2026-03-01': '삼일절',
+      '2026-03-02': '삼일절 대체공휴일',
+      '2026-05-01': '근로자의 날',
+      '2026-05-05': '어린이날',
+      '2026-05-24': '부처님오신날',
+      '2026-05-25': '부처님오신날 대체공휴일',
+      '2026-06-03': '지방선거일',
+      '2026-06-06': '현충일',
+      '2026-08-15': '광복절',
+      '2026-08-17': '광복절 대체공휴일',
+      '2026-09-24': '추석 연휴',
+      '2026-09-25': '추석',
+      '2026-09-26': '추석 연휴',
+      '2026-09-28': '추석 대체공휴일',
+      '2026-10-03': '개천절',
+      '2026-10-05': '개천절 대체공휴일',
+      '2026-10-09': '한글날',
+      '2026-12-25': '성탄절'
+    };
+
+    const TEAM_INFO = {
+      1: {
+        name: '1팀',
+        badgeClass: 'bg-blue-600 text-white',
+        lightBg: 'bg-blue-50/70',
+        borderClass: 'border-blue-200',
+        textClass: 'text-blue-700',
+        chipClass: 'bg-blue-600 text-white',
+        borderAccent: 'border-blue-500'
+      },
+      2: {
+        name: '2팀',
+        badgeClass: 'bg-emerald-600 text-white',
+        lightBg: 'bg-emerald-50/70',
+        borderClass: 'border-emerald-200',
+        textClass: 'text-emerald-700',
+        chipClass: 'bg-emerald-600 text-white',
+        borderAccent: 'border-emerald-500'
+      },
+      3: {
+        name: '3팀',
+        badgeClass: 'bg-orange-600 text-white',
+        lightBg: 'bg-orange-50/70',
+        borderClass: 'border-orange-200',
+        textClass: 'text-orange-700',
+        chipClass: 'bg-orange-600 text-white',
+        borderAccent: 'border-orange-500'
+      }
+    };
+
+    /* App State */
+    let currentYear = 2026;
+    let currentMonth = 9; // 1 ~ 12
+    let activeFilter = 'all'; // 'all' | '1' | '2' | '3'
+    let currentView = 'month'; // 'month' | 'year'
+    let selectedDateStr = null;
+
+    /* ==========================================================================
+       2. HELPER FUNCTIONS
+       ========================================================================== */
+    function formatDateKey(year, month, day) {
+      const mm = String(month).padStart(2, '0');
+      const dd = String(day).padStart(2, '0');
+      return `${year}-${mm}-${dd}`;
+    }
+
+    // Returns 1, 2, or 3 for any date
+    function getTeamForDate(year, month, day) {
+      const target = new Date(year, month - 1, day);
+      // Diff in whole days (handling timezone midnight differences safely)
+      const targetUtc = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
+      const refUtc = Date.UTC(2026, 8, 1);
+      const diffDays = Math.floor((targetUtc - refUtc) / (1000 * 60 * 60 * 24));
+      
+      const patternIdx = ((diffDays % 3) + 3) % 3;
+      return SHIFT_PATTERN[patternIdx];
+    }
+
+    function getHolidayName(year, month, day) {
+      return HOLIDAYS_2026[formatDateKey(year, month, day)] || null;
+    }
+
+    function getStorageMemo(dateKey) {
+      try {
+        return localStorage.getItem('shift_memo_' + dateKey) || '';
+      } catch(e) {
+        return '';
+      }
+    }
+
+    function setStorageMemo(dateKey, text) {
+      try {
+        if (text && text.trim()) {
+          localStorage.setItem('shift_memo_' + dateKey, text.trim());
+        } else {
+          localStorage.removeItem('shift_memo_' + dateKey);
+        }
+      } catch(e) {}
+    }
+
+    /* ==========================================================================
+       3. VIEW SWITCHING & FILTERS
+       ========================================================================== */
+    function switchView(view) {
+      currentView = view;
+      const monthViewEl = document.getElementById('monthly-view');
+      const yearViewEl = document.getElementById('yearly-view');
+      const monthPillsEl = document.getElementById('month-pills-container');
+      const tabMonth = document.getElementById('view-tab-month');
+      const tabYear = document.getElementById('view-tab-year');
+
+      if (view === 'month') {
+        monthViewEl.classList.remove('hidden');
+        yearViewEl.classList.add('hidden');
+        monthPillsEl.classList.remove('hidden');
+        tabMonth.className = 'flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-900 shadow-sm';
+        tabYear.className = 'flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-500 hover:text-slate-900';
+        renderCalendar();
+      } else {
+        monthViewEl.classList.add('hidden');
+        yearViewEl.classList.remove('hidden');
+        monthPillsEl.classList.add('hidden');
+        tabYear.className = 'flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition bg-white text-slate-900 shadow-sm';
+        tabMonth.className = 'flex-1 sm:flex-initial px-4 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition text-slate-500 hover:text-slate-900';
+        renderYearView();
+      }
+    }
+
+    function setTeamFilter(filter) {
+      activeFilter = filter;
+      ['all', '1', '2', '3'].forEach(f => {
+        const btn = document.getElementById('filter-' + f);
+        if (!btn) return;
+        if (f === filter) {
+          btn.className = 'filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-slate-900 text-white transition shadow-sm';
+        } else {
+          if (f === '1') btn.className = 'filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition border border-blue-200';
+          else if (f === '2') btn.className = 'filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition border border-emerald-200';
+          else if (f === '3') btn.className = 'filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-orange-50 text-orange-800 hover:bg-orange-100 transition border border-orange-200';
+          else btn.className = 'filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        }
+      });
+
+      if (currentView === 'month') {
+        renderCalendar();
+      } else {
+        renderYearView();
+      }
+    }
+
+    function setMonth(m) {
+      currentMonth = m;
+      renderMonthPills();
+      if (currentView !== 'month') {
+        switchView('month');
+      } else {
+        renderCalendar();
+      }
+    }
+
+    function prevMonth() {
+      if (currentMonth > 1) {
+        currentMonth--;
+      } else {
+        currentMonth = 12;
+      }
+      renderMonthPills();
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      if (currentMonth < 12) {
+        currentMonth++;
+      } else {
+        currentMonth = 1;
+      }
+      renderMonthPills();
+      renderCalendar();
+    }
+
+    function goToToday() {
+      const now = new Date();
+      if (now.getFullYear() === 2026) {
+        currentMonth = now.getMonth() + 1;
+      } else {
+        // Default to September 2026 if running outside 2026
+        currentMonth = 9;
+      }
+      renderMonthPills();
+      switchView('month');
+      
+      // Auto highlight today cell
+      setTimeout(() => {
+        const todayDay = (now.getFullYear() === 2026) ? now.getDate() : 14;
+        const cell = document.getElementById(`cell-${currentYear}-${currentMonth}-${todayDay}`);
+        if (cell) {
+          cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          cell.classList.add('ring-4', 'ring-blue-500', 'ring-offset-2');
+          setTimeout(() => cell.classList.remove('ring-4', 'ring-blue-500', 'ring-offset-2'), 2500);
+        }
+      }, 100);
+    }
+
+    /* ==========================================================================
+       4. MONTH QUICK PILLS RENDER
+       ========================================================================== */
+    function renderMonthPills() {
+      const container = document.getElementById('month-buttons');
+      container.innerHTML = '';
+      for (let m = 1; m <= 12; m++) {
+        const btn = document.createElement('button');
+        const isActive = (m === currentMonth);
+        btn.className = `px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex-shrink-0 ${
+          isActive 
+            ? 'bg-blue-600 text-white active-pill shadow-md' 
+            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+        }`;
+        btn.textContent = `${m}월`;
+        btn.onclick = () => setMonth(m);
+        container.appendChild(btn);
+      }
+    }
+
+    /* ==========================================================================
+       5. MONTHLY CALENDAR RENDER
+       ========================================================================== */
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      const title = document.getElementById('calendar-title');
+      const dutyCountEl = document.getElementById('calendar-month-duty-count');
+      const statBadgesEl = document.getElementById('month-stat-badges');
+
+      title.textContent = `${currentYear}년 ${currentMonth}월`;
+
+      grid.innerHTML = '';
+
+      // Days in current month
+      const firstDayDate = new Date(currentYear, currentMonth - 1, 1);
+      const startDayOfWeek = firstDayDate.getDay(); // 0: Sun, 1: Mon, ...
+      const lastDay = new Date(currentYear, currentMonth, 0).getDate();
+
+      // Stats counter
+      const teamCounts = { 1: 0, 2: 0, 3: 0 };
+      for (let d = 1; d <= lastDay; d++) {
+        const team = getTeamForDate(currentYear, currentMonth, d);
+        teamCounts[team]++;
+      }
+
+      dutyCountEl.textContent = `총 ${lastDay}일 (1팀: ${teamCounts[1]}일 / 2팀: ${teamCounts[2]}일 / 3팀: ${teamCounts[3]}일)`;
+
+      // Empty cells before day 1
+      const prevMonthLastDay = new Date(currentYear, currentMonth - 1, 0).getDate();
+      for (let i = 0; i < startDayOfWeek; i++) {
+        const pDay = prevMonthLastDay - startDayOfWeek + 1 + i;
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell min-h-[90px] sm:min-h-[120px] p-2 bg-slate-50/50 text-slate-300 select-none flex flex-col justify-between';
+        cell.innerHTML = `
+          <div class="text-right text-xs sm:text-sm font-bold opacity-40">${pDay}</div>
+          <div class="text-center text-[11px] text-slate-300 font-medium">이전 달</div>
+        `;
+        grid.appendChild(cell);
+      }
+
+      // Today detection
+      const realToday = new Date();
+      const isReal2026Today = (realToday.getFullYear() === 2026 && (realToday.getMonth() + 1) === currentMonth);
+      const todayDay = isReal2026Today ? realToday.getDate() : (currentMonth === 9 ? 14 : -1);
+
+      // Render days of the month
+      for (let d = 1; d <= lastDay; d++) {
+        const dateKey = formatDateKey(currentYear, currentMonth, d);
+        const dayDate = new Date(currentYear, currentMonth - 1, d);
+        const dayOfWeek = dayDate.getDay();
+        const team = getTeamForDate(currentYear, currentMonth, d);
+        const holiday = getHolidayName(currentYear, currentMonth, d);
+        const memo = getStorageMemo(dateKey);
+
+        const isToday = (d === todayDay);
+        const isSun = (dayOfWeek === 0);
+        const isSat = (dayOfWeek === 6);
+        const isHoliday = !!holiday;
+
+        // Check filter match
+        const isDimmed = (activeFilter !== 'all' && activeFilter !== String(team));
+
+        const cell = document.createElement('div');
+        cell.id = `cell-${currentYear}-${currentMonth}-${d}`;
+        cell.className = `calendar-cell min-h-[90px] sm:min-h-[120px] p-2 sm:p-2.5 transition-all cursor-pointer select-none flex flex-col justify-between relative group hover:bg-slate-50 ${
+          isToday ? 'bg-amber-50/40 ring-2 ring-blue-500 ring-inset' : 'bg-white'
+        } ${isDimmed ? 'opacity-25 grayscale-[60%]' : 'opacity-100'}`;
+
+        cell.onclick = () => openDateModal(currentYear, currentMonth, d);
+
+        // Day Number Header
+        let dayColorClass = 'text-slate-800';
+        if (isSun || isHoliday) dayColorClass = 'text-red-600';
+        else if (isSat) dayColorClass = 'text-blue-600';
+
+        let holidayHtml = isHoliday 
+          ? `<span class="truncate max-w-[80px] sm:max-w-[110px] text-[10px] sm:text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200" title="${holiday}">${holiday}</span>`
+          : '';
+
+        let todayBadgeHtml = isToday
+          ? `<span class="bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-xs">오늘</span>`
+          : '';
+
+        let memoDot = memo 
+          ? `<span class="w-2 h-2 rounded-full bg-indigo-500 inline-block ml-1" title="메모 있음"></span>` 
+          : '';
+
+        // Team Badge Styling
+        const tInfo = TEAM_INFO[team];
+        let teamBadgeClass = tInfo.badgeClass;
+
+        cell.innerHTML = `
+          <!-- Top row: Date & Badges -->
+          <div class="flex items-start justify-between gap-1">
+            <div class="flex items-center gap-1">
+              <span class="text-base sm:text-xl font-extrabold ${dayColorClass}">${d}</span>
+              ${memoDot}
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              ${todayBadgeHtml}
+              ${holidayHtml}
+            </div>
+          </div>
+
+          <!-- Middle / Bottom: BIG TEAM BADGE -->
+          <div class="my-auto py-1 sm:py-2 text-center">
+            <div class="inline-flex items-center justify-center w-full py-1.5 sm:py-2.5 px-2 rounded-xl text-sm sm:text-lg font-black tracking-tight ${teamBadgeClass} shadow-xs transition transform group-hover:scale-102">
+              <span>${tInfo.name}</span>
+            </div>
+          </div>
+
+          <!-- Bottom: Sub-status -->
+          <div class="text-[10px] sm:text-xs text-slate-400 font-medium flex justify-between items-center pt-0.5 border-t border-slate-100/70">
+            <span>${DAY_NAMES[dayOfWeek]}요일</span>
+            <span class="text-[10px] text-slate-400 group-hover:text-blue-600 font-semibold">상세보기 ❯</span>
+          </div>
+        `;
+
+        grid.appendChild(cell);
+      }
+
+      // Fill remaining empty cells to make row complete
+      const totalCells = startDayOfWeek + lastDay;
+      const remainder = totalCells % 7;
+      if (remainder > 0) {
+        const nextMonthDays = 7 - remainder;
+        for (let n = 1; n <= nextMonthDays; n++) {
+          const cell = document.createElement('div');
+          cell.className = 'calendar-cell min-h-[90px] sm:min-h-[120px] p-2 bg-slate-50/50 text-slate-300 select-none flex flex-col justify-between';
+          cell.innerHTML = `
+            <div class="text-right text-xs sm:text-sm font-bold opacity-40">${n}</div>
+            <div class="text-center text-[11px] text-slate-300 font-medium">다음 달</div>
+          `;
+          grid.appendChild(cell);
+        }
+      }
+
+      // Update stat badges in footer
+      statBadgesEl.innerHTML = `
+        <span class="font-bold text-slate-800">${currentMonth}월 당번 현황:</span>
+        <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200">1팀: ${teamCounts[1]}일</span>
+        <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">2팀: ${teamCounts[2]}일</span>
+        <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 font-bold border border-orange-200">3팀: ${teamCounts[3]}일</span>
+      `;
+    }
+
+    /* ==========================================================================
+       6. YEARLY 12-MONTH VIEW RENDER
+       ========================================================================== */
+    function renderYearView() {
+      const yearGrid = document.getElementById('year-grid');
+      yearGrid.innerHTML = '';
+
+      for (let m = 1; m <= 12; m++) {
+        const monthCard = document.createElement('div');
+        monthCard.className = 'bg-white rounded-2xl p-4 shadow-sm border border-slate-200 hover:border-blue-400 transition cursor-pointer flex flex-col';
+        monthCard.onclick = () => setMonth(m);
+
+        const firstDay = new Date(2026, m - 1, 1).getDay();
+        const daysInMonth = new Date(2026, m, 0).getDate();
+
+        let cellsHtml = '';
+        // Empty before day 1
+        for (let e = 0; e < firstDay; e++) {
+          cellsHtml += `<div class="text-[10px] text-slate-200 text-center py-1">·</div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const team = getTeamForDate(2026, m, d);
+          const holiday = getHolidayName(2026, m, d);
+          const dayDate = new Date(2026, m - 1, d);
+          const dayOfWeek = dayDate.getDay();
+
+          const isDimmed = (activeFilter !== 'all' && activeFilter !== String(team));
+
+          let bgClass = 'bg-slate-100 text-slate-700';
+          if (team === 1) bgClass = 'bg-blue-600 text-white font-bold';
+          if (team === 2) bgClass = 'bg-emerald-600 text-white font-bold';
+          if (team === 3) bgClass = 'bg-orange-600 text-white font-bold';
+
+          let numColor = 'text-slate-800';
+          if (dayOfWeek === 0 || holiday) numColor = 'text-red-500 font-black';
+          else if (dayOfWeek === 6) numColor = 'text-blue-500 font-bold';
+
+          cellsHtml += `
+            <div class="flex flex-col items-center py-0.5 rounded ${isDimmed ? 'opacity-20' : 'opacity-100'}">
+              <span class="text-[10px] ${numColor}">${d}</span>
+              <span class="text-[9px] w-full text-center rounded-sm py-0.5 mt-0.5 ${bgClass}">
+                ${team}
+              </span>
+            </div>
+          `;
+        }
+
+        monthCard.innerHTML = `
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+            <h4 class="font-extrabold text-base text-slate-900">${m}월</h4>
+            <span class="text-xs text-blue-600 font-bold hover:underline">크게 보기 ❯</span>
+          </div>
+          <!-- Mini DOW -->
+          <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 mb-1">
+            <span class="text-red-500">일</span>
+            <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span>
+            <span class="text-blue-500">토</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1">
+            ${cellsHtml}
+          </div>
+        `;
+
+        yearGrid.appendChild(monthCard);
+      }
+    }
+
+    /* ==========================================================================
+       7. HERO TODAY CARD & QUICK LOOKUP
+       ========================================================================== */
+    function initTodayHero() {
+      const now = new Date();
+      // If client is in 2026, use today, otherwise show reference date (2026-09-14)
+      const targetYear = (now.getFullYear() === 2026) ? now.getFullYear() : 2026;
+      const targetMonth = (now.getFullYear() === 2026) ? (now.getMonth() + 1) : 9;
+      const targetDay = (now.getFullYear() === 2026) ? now.getDate() : 14;
+
+      const dateStrEl = document.getElementById('today-date-str');
+      const badgeEl = document.getElementById('today-team-badge');
+      const nextPreviewEl = document.getElementById('today-next-preview');
+
+      const dayOfWeekStr = DAY_NAMES[new Date(targetYear, targetMonth - 1, targetDay).getDay()];
+      dateStrEl.textContent = `${targetYear}년 ${targetMonth}월 ${targetDay}일 (${dayOfWeekStr})`;
+
+      const todayTeam = getTeamForDate(targetYear, targetMonth, targetDay);
+      const nextDate = new Date(targetYear, targetMonth - 1, targetDay + 1);
+      const nextTeam = getTeamForDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate());
+
+      const tInfo = TEAM_INFO[todayTeam];
+      badgeEl.textContent = `${tInfo.name} 당번`;
+      badgeEl.className = `text-2xl sm:text-3xl font-black px-4 py-1 rounded-xl shadow-sm tracking-tight text-white ${tInfo.badgeClass}`;
+
+      const nextInfo = TEAM_INFO[nextTeam];
+      nextPreviewEl.innerHTML = `내일 당번: <strong class="${nextInfo.textClass}">${nextInfo.name}</strong> (${DAY_NAMES[nextDate.getDay()]}요일)`;
+
+      // Quick date picker default
+      document.getElementById('quick-date-picker').value = formatDateKey(targetYear, targetMonth, targetDay);
+      handleQuickLookup();
+    }
+
+    function handleQuickLookup() {
+      const val = document.getElementById('quick-date-picker').value;
+      const resultEl = document.getElementById('quick-result');
+      if (!val) {
+        resultEl.innerHTML = '<span class="text-red-500">날짜를 선택하세요.</span>';
+        return;
+      }
+      const [y, m, d] = val.split('-').map(Number);
+      const team = getTeamForDate(y, m, d);
+      const holiday = getHolidayName(y, m, d);
+      const dow = DAY_NAMES[new Date(y, m - 1, d).getDay()];
+      const tInfo = TEAM_INFO[team];
+
+      let holidayText = holiday ? ` · <span class="text-red-600 font-bold">${holiday}</span>` : '';
+      resultEl.innerHTML = `
+        <span>${m}월 ${d}일(${dow})${holidayText} 당번은 <strong class="${tInfo.textClass} text-sm font-black underline underline-offset-2">${tInfo.name}</strong> 입니다.</span>
+      `;
+    }
+
+    /* ==========================================================================
+       8. MODAL FOR CELL CLICK
+       ========================================================================== */
+    function openDateModal(year, month, day) {
+      selectedDateStr = formatDateKey(year, month, day);
+      const dateObj = new Date(year, month - 1, day);
+      const dow = DAY_NAMES[dateObj.getDay()];
+      const team = getTeamForDate(year, month, day);
+      const holiday = getHolidayName(year, month, day);
+
+      const prevDate = new Date(year, month - 1, day - 1);
+      const prevTeam = getTeamForDate(prevDate.getFullYear(), prevDate.getMonth() + 1, prevDate.getDate());
+
+      const nextDate = new Date(year, month - 1, day + 1);
+      const nextTeam = getTeamForDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate());
+
+      // Set titles
+      document.getElementById('modal-date-title').textContent = `${year}년 ${month}월 ${day}일 (${dow})`;
+      
+      const holidayBadge = document.getElementById('modal-holiday-badge');
+      if (holiday) {
+        holidayBadge.textContent = `공휴일 : ${holiday}`;
+        holidayBadge.classList.remove('hidden');
+      } else {
+        holidayBadge.classList.add('hidden');
+      }
+
+      // Team Box
+      const teamBox = document.getElementById('modal-team-box');
+      const teamName = document.getElementById('modal-team-name');
+      const teamDesc = document.getElementById('modal-team-desc');
+      const tInfo = TEAM_INFO[team];
+
+      teamName.textContent = tInfo.name;
+      teamName.className = `text-4xl font-black my-1 ${tInfo.textClass}`;
+      teamBox.className = `mt-5 p-5 rounded-2xl text-center border ${tInfo.lightBg} ${tInfo.borderClass}`;
+      teamDesc.textContent = `경남소방 대원 3교대 정규 당번 근무`;
+
+      // Shifts
+      const prevInfo = TEAM_INFO[prevTeam];
+      const nextInfo = TEAM_INFO[nextTeam];
+      document.getElementById('modal-prev-shift').innerHTML = `<span class="${prevInfo.textClass}">${prevInfo.name}</span> (${DAY_NAMES[prevDate.getDay()]})`;
+      document.getElementById('modal-next-shift').innerHTML = `<span class="${nextInfo.textClass}">${nextInfo.name}</span> (${DAY_NAMES[nextDate.getDay()]})`;
+
+      // Memo
+      document.getElementById('modal-memo-input').value = getStorageMemo(selectedDateStr);
+
+      // Show Modal
+      const modal = document.getElementById('date-modal');
+      const content = document.getElementById('date-modal-content');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('date-modal');
+      const content = document.getElementById('date-modal-content');
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 150);
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'date-modal') {
+        closeModal();
+      }
+    }
+
+    function saveMemo() {
+      if (!selectedDateStr) return;
+      const text = document.getElementById('modal-memo-input').value;
+      setStorageMemo(selectedDateStr, text);
+      closeModal();
+      if (currentView === 'month') {
+        renderCalendar();
+      }
+    }
+
+    /* ==========================================================================
+       9. KEYBOARD & TOUCH NAVIGATION
+       ========================================================================== */
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') prevMonth();
+      if (e.key === 'ArrowRight') nextMonth();
+    });
+
+    // Simple mobile swipe gesture for changing months
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const calendarGridEl = document.getElementById('calendar-grid');
+
+    calendarGridEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    calendarGridEl.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 65) {
+        if (diff > 0) {
+          prevMonth(); // Swiped right -> prev month
+        } else {
+          nextMonth(); // Swiped left -> next month
+        }
+      }
+    }
+
+    /* ==========================================================================
+       10. INITIALIZATION ON LOAD
+       ========================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      initTodayHero();
+      renderMonthPills();
+      renderCalendar();
+
+      // Listen for quick picker changes
+      document.getElementById('quick-date-picker').addEventListener('change', handleQuickLookup);
+    });
+  </script>
+</body>
+</html>
